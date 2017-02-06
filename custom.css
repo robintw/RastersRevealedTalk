@@ -1,0 +1,12 @@
+.reveal {
+    font-size: 200%;
+}
+
+.reveal div.slides {
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: 87% !important;
+}
