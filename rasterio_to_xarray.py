@@ -21,37 +21,36 @@ def rasterio_to_xarray(fname):
 
     This has only been tested with GeoTIFF files: use other types of files
     at your own risk!"""
-    with rasterio.drivers():
-        with rasterio.open(fname) as src:
-            data = src.read(1)
+    with rasterio.open(fname) as src:
+        data = src.read(1)
 
-            # Set values to nan wherever they are equal to the nodata
-            # value defined in the input file
-            data = np.where(data == src.nodata, np.nan, data)
+        # Set values to nan wherever they are equal to the nodata
+        # value defined in the input file
+        data = np.where(data == src.nodata, np.nan, data)
 
-            # Get coords
-            nx, ny = src.width, src.height
-            x0, y0 = src.bounds.left, src.bounds.top
-            dx, dy = src.res[0], -src.res[1]
+        # Get coords
+        nx, ny = src.width, src.height
+        x0, y0 = src.bounds.left, src.bounds.top
+        dx, dy = src.res[0], -src.res[1]
 
-            coords = {'y': np.arange(start=y0, stop=(y0 + ny * dy), step=dy),
-                      'x': np.arange(start=x0, stop=(x0 + nx * dx), step=dx)}
+        coords = {'y': np.arange(start=y0, stop=(y0 + ny * dy), step=dy),
+                  'x': np.arange(start=x0, stop=(x0 + nx * dx), step=dx)}
 
-            dims = ('y', 'x')
+        dims = ('y', 'x')
 
-            attrs = {}
+        attrs = {}
 
-            try:
-                aff = src.affine
-                attrs['affine'] = aff.to_gdal()
-            except AttributeError:
-                pass
+        try:
+            aff = src.transform
+            attrs['affine'] = aff.to_gdal()
+        except AttributeError:
+            pass
 
-            try:
-                c = src.crs
-                attrs['crs'] = c.to_string()
-            except AttributeError:
-                pass
+        try:
+            c = src.crs
+            attrs['crs'] = c.to_string()
+        except AttributeError:
+            pass
 
     return xr.DataArray(data, dims=dims, coords=coords, attrs=attrs)
 
